@@ -55,7 +55,7 @@ func Aggregate(results map[string]Log, output chan map[string]Log) map[string]Lo
     return results
 }
 
-func LogSearch(project int, from string, duration int, limit int) map[string]Log {
+func LogSearch(project string, from string, duration int, limit int) map[string]map[string]string {
 
     
     //output := make(chan map[string]Log)
@@ -146,23 +146,34 @@ func LogSearch(project int, from string, duration int, limit int) map[string]Log
 	    }
 	}
 	
+	
+	marshaled := make(map[string]map[string]string)
+	
+	//marsh := make(map[string]string)
 	for key, value := range filterItems {
 	    value.rank /= value.counter;
 	    value.rangeItem = allCount
-	    filterItems[key] = value;
+	    
+	    marsh := make(map[string]string)
+	    
+	    marsh["rank"] = fmt.Sprintf("%v", value.rank)
+	    marsh["rangeitem"] = fmt.Sprintf("%v", value.rangeItem)
+	    marsh["count"] = fmt.Sprintf("%v", value.counter)
+	    
+	    marshaled[key] = marsh;
 	}
 	
 	
     //}();
     
     
-    return filterItems
+    return marshaled
     
     //return output
 }
 
 
-func GetLog(project int, from,to string, limit int) <- chan map[string]Log {
+func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
     output := make(chan map[string]Log)
     
     location, _ := time.LoadLocation("Europe/Kiev")
@@ -267,6 +278,10 @@ func Links(project int) map[string]string{
 	//fmt.Print(keyword);
     }
     
+    if(len(tmpResp) == 0) {
+	return response
+    }
+    
     items := make([]string, len(tmpResp))
     
     i := 0;
@@ -288,6 +303,14 @@ func Links(project int) map[string]string{
     }
     
     return response
+}
+
+func Count() {
+    cluster := gocql.NewCluster("10.1.51.65","10.1.51.66")
+    cluster.Keyspace = "avp"
+    session, _ := cluster.CreateSession()
+    
+    query := fmt.Sprintf("select * from checkers limit 1000000")
 }
 
 func ReturnRand(volume int64, r *rand.Rand) string {
