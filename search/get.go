@@ -21,6 +21,18 @@ type Log struct {
     counter 	int
 }
 
+type Checked struct {
+    checked	int
+    project	int
+    catid	string
+    subid	string
+    city	string
+    operation	string
+    counter	int
+}
+
+const projects map[string]int{"auto":1,"ria":2,"dom":3,"market":5}
+
 type Input struct {
     category	string	`bson:"category"`
     subcategory	string	`bson:"subcategory"`
@@ -310,6 +322,13 @@ func Count() {
     cluster.Keyspace = "avp"
     session, _ := cluster.CreateSession()
     
+    output := make(chan map[string]Checked)
+    
+    
+    
+    go func() {
+	
+    }()
     query := fmt.Sprintf("select * from checkers limit 1000000")
 }
 
