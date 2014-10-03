@@ -7,6 +7,7 @@ import (
 	"time"
 	"strings"
 	"math/rand"
+	//"encoding/json"
 )
 
 type Log struct {
@@ -30,8 +31,6 @@ type Checked struct {
     operation	string
     counter	int
 }
-
-const projects map[string]int{"auto":1,"ria":2,"dom":3,"market":5}
 
 type Input struct {
     category	string	`bson:"category"`
@@ -232,27 +231,6 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
     }();
     
     
-    
-    //output := make(chan map[string]Log)
-    /*filtered := map[string]Log
-    counter := 0;
-    added := 0;
-    for _,value := range logged {
-	
-	if (value.counter > 1) {
-	    filtered = Aggregate(filtered, value, value.keyword)
-	    added++;
-	}
-	counter++;
-    }*/
-    
-    /*for keyIter,_ := range filtered {
-	insert := filtered[keyIter];
-	insert.rank = insert.rank / insert.counter;
-	
-	filtered[keyIter] = insert;
-    }*/
-    
     if err := iter.Close(); err != nil {
 	log.Fatal(err)
     }
@@ -317,19 +295,91 @@ func Links(project int) map[string]string{
     return response
 }
 
-func Count() {
+func Count() [][]string {
     cluster := gocql.NewCluster("10.1.51.65","10.1.51.66")
-    cluster.Keyspace = "avp"
+    cluster.Keyspace = "counterks"
     session, _ := cluster.CreateSession()
     
     output := make(chan map[string]Checked)
     
+    checkers := map[int]string{0:"не проверено",1:"проверено"}
+    
+    projects := map[int]string{1:"Auto",2:"Ria",3:"Dom",5:"Market"}
+    
+    var catid,subid,city,operation string
+    var checked,project,counter int
     
     
-    go func() {
+    grabbed := make(map[string]Checked)
+    for chk, _ := range checkers {
+    
+	for pInd, _ := range projects {
 	
-    }()
-    query := fmt.Sprintf("select * from checkers limit 1000000")
+	    query := fmt.Sprintf("select checked,project,catid,subid,city,operation,counterval from checkers where checked = %d and project = %d limit 100000", chk, pInd)
+	    
+	    iter := session.Query(query).Iter()
+	    
+	    
+	    
+	    
+    	    go func() {
+		
+		for iter.Scan(&checked, &project, &catid, &subid, &city, &operation, &counter) {
+		    out := Checked{checked, project, catid, subid, city, operation, counter}
+		    
+		    substKey := fmt.Sprintf("%s-%s-%s-%s-%s", checkers[out.checked], projects[out.project], out.catid, out.operation, out.city)
+		    _, exist := grabbed[substKey]
+		    if (exist) {
+			
+			out.counter += grabbed[substKey].counter
+		    }
+		    grabbed[substKey] = out
+		}
+		output <- grabbed
+		
+	    }()
+	    
+	    if err := iter.Close(); err != nil {
+		log.Fatal(err)
+	    }
+	}
+    
+    }
+    
+    tmpData := make(map[string]Checked);
+    tmpData = <- output;
+    
+    
+    
+    response := make([][]string, len(tmpData))
+    
+    //item := make(map[string]string)
+    i:=0
+    for ind, valR := range tmpData {
+	item := make([]string, 2)
+	/*item["checked"] = fmt.Sprintf("%d", valR.checked)
+	item["project"] = fmt.Sprintf("%d", valR.project)
+	item["category"] = valR.catid
+	item["subcategory"] = valR.subid
+	item["city"] = valR.city
+	item["operation"] = valR.operation
+	item["count"] = fmt.Sprintf("%d", valR.counter)
+	*/
+	
+	//marsh, _ := json.Marshal(item)
+	item[0] = ind
+	
+	if(valR.counter < 0) {
+	    valR.counter = 0
+	}
+	item[1] = fmt.Sprintf("%d", valR.counter)
+	response[i] = item
+	i++
+    }
+    
+    defer session.Close()
+    
+    return response
 }
 
 func ReturnRand(volume int64, r *rand.Rand) string {

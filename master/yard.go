@@ -357,7 +357,22 @@ func listHandler(w http.ResponseWriter, r *http.Request, param map[string]string
 }
 
 func counterHandler(w http.ResponseWriter, r *http.Request, params map[string]string) {
+    resp := search.Count()
     
+    jsn, err := json.Marshal(resp)
+    
+    //sl.Info(fmt.Sprintf("%s", jsn))
+    
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "http://avp.ria.local")
+    w.Header().Set("Access-Control-Allow-Credentials", "true")
+    w.Header().Set("Access-Control-Allow-Headers", "authorization")
+    
+    w.Write(jsn)
 }
 
 
