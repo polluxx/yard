@@ -355,8 +355,9 @@ func Count() [][]string {
     
     //item := make(map[string]string)
     i:=0
+    var item []string
     for ind, valR := range tmpData {
-	item := make([]string, 2)
+	item = make([]string, 2)
 	/*item["checked"] = fmt.Sprintf("%d", valR.checked)
 	item["project"] = fmt.Sprintf("%d", valR.project)
 	item["category"] = valR.catid

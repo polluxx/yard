@@ -52,7 +52,7 @@ func mainHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
     return func(w http.ResponseWriter, r *http.Request) {
 	
 	// change valid path for main queries
-	var validPath = regexp.MustCompile("^/(links|report)/([a-zA-Z0-9-]+)$")
+	var validPath = regexp.MustCompile("^/(links|report|relinks)/([a-zA-Z0-9-]+)$")
         mess := validPath.FindStringSubmatch(r.URL.Path)
         
         if mess == nil {
@@ -246,9 +246,11 @@ func ResponseRawData(w http.ResponseWriter, itemsResp map[string]map[string]stri
         return
     }
     w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("Access-Control-Allow-Origin", "http://avp.ria.local")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Credentials", "true")
     w.Header().Set("Access-Control-Allow-Headers", "authorization")
+    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    
     
     w.Write(jsn);
 }
@@ -290,9 +292,10 @@ func makeResp(w http.ResponseWriter, r *http.Request, data map[string]string) {
         return
     }
     w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("Access-Control-Allow-Origin", "http://avp.ria.local")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Credentials", "true")
     w.Header().Set("Access-Control-Allow-Headers", "authorization")
+    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
     w.Write(jsn);
 }
 
@@ -368,12 +371,14 @@ func counterHandler(w http.ResponseWriter, r *http.Request, params map[string]st
         return
     }
     w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("Access-Control-Allow-Origin", "http://avp.ria.local")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Credentials", "true")
     w.Header().Set("Access-Control-Allow-Headers", "authorization")
+    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
     
     w.Write(jsn)
 }
+
 
 
 type By func(a1, a2 *Record) bool
