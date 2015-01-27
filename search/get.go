@@ -190,8 +190,14 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
     location, _ := time.LoadLocation("Europe/Kiev")
 
     cluster := gocql.NewCluster("10.1.51.65","10.1.51.66")
+	cluster.NumConns = 1
+	cluster.NumStreams = 64
+	cluster.MaxPreparedStmts = 2000
+	cluster.Consistency(gocql.One)
+
     cluster.Keyspace = "avp"
     session, _ := cluster.CreateSession()
+	defer session.Close()
     var keyword, cat, subcat, city, item string;
     var timedata time.Time;
     
@@ -235,7 +241,7 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
 		log.Fatal(err)
     }
 
-    defer session.Close()
+
     
     return output;
 }
