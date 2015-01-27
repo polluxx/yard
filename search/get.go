@@ -210,29 +210,29 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
     response := make(map[string]Log)
     
     go func() {
-    
-	for iter.Scan(&rank, &keyword, &cat, &subcat, &city, &timedata, &item) {
-	
-	    time := timedata;
-	
-	    t := timedata.In(location).Format(timeform)
-	    day := time.In(location).Format(dayform)
-	
-	    dayTime := strings.Split(day, "Z")
-	
-	    response[item] = Log{rank,keyword,cat,subcat,city, t, dayTime[0], 0, 1}
-	
-	//logged = Aggregate(logged, valLog, item);
-	
-	}
-	
-	output <- response
+
+		for iter.Scan(&rank, &keyword, &cat, &subcat, &city, &timedata, &item) {
+
+			time := timedata;
+
+			t := timedata.In(location).Format(timeform)
+			day := time.In(location).Format(dayform)
+
+			dayTime := strings.Split(day, "Z")
+
+			response[item] = Log{rank,keyword,cat,subcat,city, t, dayTime[0], 0, 1}
+
+		//logged = Aggregate(logged, valLog, item);
+
+		}
+
+		output <- response
     
     }();
     
     
     if err := iter.Close(); err != nil {
-	log.Fatal(err)
+		log.Fatal(err)
     }
 
     defer session.Close()

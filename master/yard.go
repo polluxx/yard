@@ -37,7 +37,7 @@ func main() {
     s := &http.Server{
 	Addr:           ":8090",
 	//Handler:        Handle,
-	ReadTimeout:    10 * time.Second,
+	ReadTimeout:    120 * time.Second,
 	WriteTimeout:   120 * time.Second,
 	MaxHeaderBytes: 1 << 20,
     }
