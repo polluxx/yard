@@ -193,7 +193,6 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
 	cluster.NumConns = 1
 	cluster.NumStreams = 64
 	cluster.MaxPreparedStmts = 2000
-	cluster.Consistency(gocql.One)
 
     cluster.Keyspace = "avp"
     session, _ := cluster.CreateSession()
@@ -205,7 +204,7 @@ func GetLog(project string, from,to string, limit int) <- chan map[string]Log {
     
     //var paramsToGrab
     
-    iter := session.Query(fmt.Sprintf("select rank, keyword, cat, subcat, city, time, item from rank_log where project = %v and time > '%v' and time < '%v' limit %v", project, from, to, limit)).Iter() 
+    iter := session.Query(fmt.Sprintf("select rank, keyword, cat, subcat, city, time, item from rank_log where project = %v and time > '%v' and time < '%v' limit %v", project, from, to, limit)).Consistency(gocql.One).Iter()
     
     const timeform = "02 Jan 06 15:04 (MST)"
     
